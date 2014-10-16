@@ -395,3 +395,22 @@ func TestSegmentAdvanceTooFarError(t *testing.T) {
 		t.Fatalf("expected %q got %v", testError, err)
 	}
 }
+
+func TestSegmentLongTokens(t *testing.T) {
+	// Read the data.
+	text := bytes.Repeat([]byte("abcdefghijklmnop"), 257)
+	buf := strings.NewReader(string(text))
+	s := NewSegmenter(&slowReader{1, buf})
+	// change to line segmenter for testing
+	s.SetSegmenter(wrapSplitFuncAsSegmentFuncForTesting(bufio.ScanLines))
+	for s.Segment() {
+		line := s.Bytes()
+		if !bytes.Equal(text, line) {
+			t.Errorf("expected %s, got %s", text, line)
+		}
+	}
+	err := s.Err()
+	if err != nil {
+		t.Fatalf("unexpected error; got %s", err)
+	}
+}
