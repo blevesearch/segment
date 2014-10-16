@@ -7,6 +7,10 @@ as described in [Unicode Standard Annex #29](http://www.unicode.org/reports/tr29
 
 * Currently only segmentation at Word Boundaries is supported.
 
+## License
+
+Apache License Version 2.0
+
 ## Usage
 
 The functionality is exposed in two ways:
@@ -36,3 +40,13 @@ but additionally a token type is returned.
 		if err := segmenter.Err(); err != nil {
 			t.Fatal(err)
 		}
+
+## Generating Tables
+
+The tables.go file is generated from the data in the Unicode Text Segmentation property data files.  Also the tables_test.go file is generated from the data in the Unicode Text Segmentation test data files.
+
+To regenerate the files run:
+
+         make tables
+
+ The data generated will be based on the Unicode version set by the unicode package value ```unicode.Version```.
