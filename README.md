@@ -57,3 +57,5 @@ To regenerate the files run:
  [![Build Status](https://drone.io/github.com/blevesearch/segment/status.png)](https://drone.io/github.com/blevesearch/segment/latest)
 
  [![Coverage Status](https://img.shields.io/coveralls/blevesearch/segment.svg)](https://coveralls.io/r/blevesearch/segment?branch=master)
+
+ [![GoDoc](https://godoc.org/github.com/blevesearch/segment?status.svg)](https://godoc.org/github.com/blevesearch/segment)
