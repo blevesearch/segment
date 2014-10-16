@@ -51,6 +51,7 @@ To regenerate the files run:
 
  The data generated will be based on the Unicode version set by the unicode package value ```unicode.Version```.
 
- ## Status
+## Status
+
 
  [![Build Status](https://drone.io/github.com/blevesearch/segment/status.png)](https://drone.io/github.com/blevesearch/segment/latest)
