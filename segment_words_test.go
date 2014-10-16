@@ -19,9 +19,10 @@ import (
 func TestAdhocSegmentsWithType(t *testing.T) {
 
 	tests := []struct {
-		input       []byte
-		output      [][]byte
-		outputTypes []int
+		input         []byte
+		output        [][]byte
+		outputStrings []string
+		outputTypes   []int
 	}{
 		{
 			input: []byte("Now is the.\n End."),
@@ -36,6 +37,18 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 				[]byte(" "),
 				[]byte("End"),
 				[]byte("."),
+			},
+			outputStrings: []string{
+				"Now",
+				" ",
+				"is",
+				" ",
+				"the",
+				".",
+				"\n",
+				" ",
+				"End",
+				".",
 			},
 			outputTypes: []int{
 				Letter,
@@ -55,6 +68,9 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 			output: [][]byte{
 				[]byte("3.5"),
 			},
+			outputStrings: []string{
+				"3.5",
+			},
 			outputTypes: []int{
 				Number,
 			},
@@ -64,6 +80,9 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 			output: [][]byte{
 				[]byte("cat3.5"),
 			},
+			outputStrings: []string{
+				"cat3.5",
+			},
 			outputTypes: []int{
 				Letter,
 			},
@@ -72,6 +91,9 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 			input: []byte("c"),
 			output: [][]byte{
 				[]byte("c"),
+			},
+			outputStrings: []string{
+				"c",
 			},
 			outputTypes: []int{
 				Letter,
@@ -87,6 +109,15 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 				[]byte("は"),
 				[]byte("世"),
 				[]byte("界"),
+			},
+			outputStrings: []string{
+				"こ",
+				"ん",
+				"に",
+				"ち",
+				"は",
+				"世",
+				"界",
 			},
 			outputTypes: []int{
 				Ideo,
@@ -106,6 +137,12 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 				[]byte("世"),
 				[]byte("界"),
 			},
+			outputStrings: []string{
+				"你",
+				"好",
+				"世",
+				"界",
+			},
 			outputTypes: []int{
 				Ideo,
 				Ideo,
@@ -118,6 +155,9 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 			output: [][]byte{
 				[]byte("サッカ"),
 			},
+			outputStrings: []string{
+				"サッカ",
+			},
 			outputTypes: []int{
 				Ideo,
 			},
@@ -126,11 +166,13 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 
 	for _, test := range tests {
 		rv := make([][]byte, 0)
+		rvstrings := make([]string, 0)
 		rvtypes := make([]int, 0)
 		segmenter := NewWordSegmenter(bytes.NewReader(test.input))
 		// Set the split function for the scanning operation.
 		for segmenter.Segment() {
 			rv = append(rv, segmenter.Bytes())
+			rvstrings = append(rvstrings, segmenter.Text())
 			rvtypes = append(rvtypes, segmenter.Type())
 		}
 		if err := segmenter.Err(); err != nil {
@@ -138,6 +180,9 @@ func TestAdhocSegmentsWithType(t *testing.T) {
 		}
 		if !reflect.DeepEqual(rv, test.output) {
 			t.Fatalf("expected:\n%#v\ngot:\n%#v\nfor: '%s'", test.output, rv, test.input)
+		}
+		if !reflect.DeepEqual(rvstrings, test.outputStrings) {
+			t.Fatalf("expected:\n%#v\ngot:\n%#v\nfor: '%s'", test.outputStrings, rvstrings, test.input)
 		}
 		if !reflect.DeepEqual(rvtypes, test.outputTypes) {
 			t.Fatalf("expeced:\n%#v\ngot:\n%#v\nfor: '%s'", test.outputTypes, rvtypes, test.input)
