@@ -302,7 +302,7 @@ func TestSegmentTooLong(t *testing.T) {
 var testError = errors.New("testError")
 
 // Test the correct error is returned when the split function errors out.
-func TestSplitError(t *testing.T) {
+func TestSegmentError(t *testing.T) {
 	// Create a split function that delivers a little data, then a predictable error.
 	numSplits := 0
 	const okCount = 7
@@ -353,5 +353,45 @@ func TestBadReader(t *testing.T) {
 	err := scanner.Err()
 	if err != io.ErrNoProgress {
 		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestSegmentAdvanceNegativeError(t *testing.T) {
+	errorSplit := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		if atEOF {
+			panic("didn't get enough data")
+		}
+		return -1, data[0:1], nil
+	}
+	// Read the data.
+	const text = "abcdefghijklmnopqrstuvwxyz"
+	buf := strings.NewReader(text)
+	s := NewSegmenter(&slowReader{1, buf})
+	// change to line segmenter for testing
+	s.SetSegmenter(wrapSplitFuncAsSegmentFuncForTesting(errorSplit))
+	s.Segment()
+	err := s.Err()
+	if err != ErrNegativeAdvance {
+		t.Fatalf("expected %q got %v", testError, err)
+	}
+}
+
+func TestSegmentAdvanceTooFarError(t *testing.T) {
+	errorSplit := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		if atEOF {
+			panic("didn't get enough data")
+		}
+		return len(data) + 10, data[0:1], nil
+	}
+	// Read the data.
+	const text = "abcdefghijklmnopqrstuvwxyz"
+	buf := strings.NewReader(text)
+	s := NewSegmenter(&slowReader{1, buf})
+	// change to line segmenter for testing
+	s.SetSegmenter(wrapSplitFuncAsSegmentFuncForTesting(errorSplit))
+	s.Segment()
+	err := s.Err()
+	if err != ErrAdvanceTooFar {
+		t.Fatalf("expected %q got %v", testError, err)
 	}
 }
