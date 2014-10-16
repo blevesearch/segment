@@ -252,10 +252,52 @@ func genLine(buf *bytes.Buffer, lineNum, n int, addNewline bool) {
 	return
 }
 
-func segmentLines(data []byte, atEOF bool) (advance int, token []byte, typ int, err error) {
-	typ = 0
-	advance, token, err = bufio.ScanLines(data, atEOF)
-	return
+func wrapSplitFuncAsSegmentFuncForTesting(splitFunc bufio.SplitFunc) SegmentFunc {
+	return func(data []byte, atEOF bool) (advance int, token []byte, typ int, err error) {
+		typ = 0
+		advance, token, err = splitFunc(data, atEOF)
+		return
+	}
+}
+
+// Test the line splitter, including some carriage returns but no long lines.
+func TestSegmentLongLines(t *testing.T) {
+	const smallMaxTokenSize = 256 // Much smaller for more efficient testing.
+	// Build a buffer of lots of line lengths up to but not exceeding smallMaxTokenSize.
+	tmp := new(bytes.Buffer)
+	buf := new(bytes.Buffer)
+	lineNum := 0
+	j := 0
+	for i := 0; i < 2*smallMaxTokenSize; i++ {
+		genLine(tmp, lineNum, j, true)
+		if j < smallMaxTokenSize {
+			j++
+		} else {
+			j--
+		}
+		buf.Write(tmp.Bytes())
+		lineNum++
+	}
+	s := NewSegmenter(&slowReader{1, buf})
+	s.SetSegmenter(wrapSplitFuncAsSegmentFuncForTesting(bufio.ScanLines))
+	s.MaxTokenSize(smallMaxTokenSize)
+	j = 0
+	for lineNum := 0; s.Segment(); lineNum++ {
+		genLine(tmp, lineNum, j, false)
+		if j < smallMaxTokenSize {
+			j++
+		} else {
+			j--
+		}
+		line := tmp.String() // We use the string-valued token here, for variety.
+		if s.Text() != line {
+			t.Errorf("%d: bad line: %d %d\n%.100q\n%.100q\n", lineNum, len(s.Bytes()), len(line), s.Text(), line)
+		}
+	}
+	err := s.Err()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Test that the line segmenter errors out on a long line.
@@ -274,7 +316,7 @@ func TestSegmentTooLong(t *testing.T) {
 	}
 	s := NewSegmenter(&slowReader{3, buf})
 	// change to line segmenter for testing
-	s.SetSegmenter(segmentLines)
+	s.SetSegmenter(wrapSplitFuncAsSegmentFuncForTesting(bufio.ScanLines))
 	s.MaxTokenSize(smallMaxTokenSize)
 	j = 0
 	for lineNum := 0; s.Segment(); lineNum++ {
