@@ -16,6 +16,17 @@ import (
 
 const maxConsecutiveEmptyReads = 100
 
+// NewSegmenter returns a new Segmenter to read from r.
+// Defaults to segment using SegmentWords
+func NewSegmenter(r io.Reader) *Segmenter {
+	return &Segmenter{
+		r:            r,
+		segment:      SegmentWords,
+		maxTokenSize: MaxScanTokenSize,
+		buf:          make([]byte, 4096), // Plausible starting size; needn't be large.
+	}
+}
+
 // Segmenter provides a convenient interface for reading data such as
 // a file of newline-delimited lines of text. Successive calls to
 // the Segment method will step through the 'tokens' of a file, skipping

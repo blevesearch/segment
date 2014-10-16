@@ -12,6 +12,7 @@ package segment
 import (
 	"bufio"
 	"bytes"
+	"io"
 	"reflect"
 	"testing"
 )
@@ -207,5 +208,89 @@ func TestUnicodeSegments(t *testing.T) {
 		if !reflect.DeepEqual(rv, test.output) {
 			t.Fatalf("expected:\n%#v\ngot:\n%#v\nfor: '%s'", test.output, rv, test.input)
 		}
+	}
+}
+
+// Tests borrowed from Scanner to test Segmenter
+
+// slowReader is a reader that returns only a few bytes at a time, to test the incremental
+// reads in Scanner.Scan.
+type slowReader struct {
+	max int
+	buf io.Reader
+}
+
+func (sr *slowReader) Read(p []byte) (n int, err error) {
+	if len(p) > sr.max {
+		p = p[0:sr.max]
+	}
+	return sr.buf.Read(p)
+}
+
+// genLine writes to buf a predictable but non-trivial line of text of length
+// n, including the terminal newline and an occasional carriage return.
+// If addNewline is false, the \r and \n are not emitted.
+func genLine(buf *bytes.Buffer, lineNum, n int, addNewline bool) {
+	buf.Reset()
+	doCR := lineNum%5 == 0
+	if doCR {
+		n--
+	}
+	for i := 0; i < n-1; i++ { // Stop early for \n.
+		c := 'a' + byte(lineNum+i)
+		if c == '\n' || c == '\r' { // Don't confuse us.
+			c = 'N'
+		}
+		buf.WriteByte(c)
+	}
+	if addNewline {
+		if doCR {
+			buf.WriteByte('\r')
+		}
+		buf.WriteByte('\n')
+	}
+	return
+}
+
+func segmentLines(data []byte, atEOF bool) (advance int, token []byte, typ int, err error) {
+	typ = 0
+	advance, token, err = bufio.ScanLines(data, atEOF)
+	return
+}
+
+// Test that the line segmenter errors out on a long line.
+func TestSegmentTooLong(t *testing.T) {
+	const smallMaxTokenSize = 256 // Much smaller for more efficient testing.
+	// Build a buffer of lots of line lengths up to but not exceeding smallMaxTokenSize.
+	tmp := new(bytes.Buffer)
+	buf := new(bytes.Buffer)
+	lineNum := 0
+	j := 0
+	for i := 0; i < 2*smallMaxTokenSize; i++ {
+		genLine(tmp, lineNum, j, true)
+		j++
+		buf.Write(tmp.Bytes())
+		lineNum++
+	}
+	s := NewSegmenter(&slowReader{3, buf})
+	// change to line segmenter for testing
+	s.SetSegmenter(segmentLines)
+	s.MaxTokenSize(smallMaxTokenSize)
+	j = 0
+	for lineNum := 0; s.Segment(); lineNum++ {
+		genLine(tmp, lineNum, j, false)
+		if j < smallMaxTokenSize {
+			j++
+		} else {
+			j--
+		}
+		line := tmp.Bytes()
+		if !bytes.Equal(s.Bytes(), line) {
+			t.Errorf("%d: bad line: %d %d\n%.100q\n%.100q\n", lineNum, len(s.Bytes()), len(line), s.Bytes(), line)
+		}
+	}
+	err := s.Err()
+	if err != ErrTooLong {
+		t.Fatalf("expected ErrTooLong; got %s", err)
 	}
 }
