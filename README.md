@@ -1,6 +1,6 @@
 # segment
 
-A library for performing Unicode Text Segmentation
+A Go library for performing Unicode Text Segmentation
 as described in [Unicode Standard Annex #29](http://www.unicode.org/reports/tr29/)
 
 ## Features
