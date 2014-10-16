@@ -12,8 +12,10 @@ package segment
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -260,46 +262,6 @@ func wrapSplitFuncAsSegmentFuncForTesting(splitFunc bufio.SplitFunc) SegmentFunc
 	}
 }
 
-// Test the line splitter, including some carriage returns but no long lines.
-func TestSegmentLongLines(t *testing.T) {
-	const smallMaxTokenSize = 256 // Much smaller for more efficient testing.
-	// Build a buffer of lots of line lengths up to but not exceeding smallMaxTokenSize.
-	tmp := new(bytes.Buffer)
-	buf := new(bytes.Buffer)
-	lineNum := 0
-	j := 0
-	for i := 0; i < 2*smallMaxTokenSize; i++ {
-		genLine(tmp, lineNum, j, true)
-		if j < smallMaxTokenSize {
-			j++
-		} else {
-			j--
-		}
-		buf.Write(tmp.Bytes())
-		lineNum++
-	}
-	s := NewSegmenter(&slowReader{1, buf})
-	s.SetSegmenter(wrapSplitFuncAsSegmentFuncForTesting(bufio.ScanLines))
-	s.MaxTokenSize(smallMaxTokenSize)
-	j = 0
-	for lineNum := 0; s.Segment(); lineNum++ {
-		genLine(tmp, lineNum, j, false)
-		if j < smallMaxTokenSize {
-			j++
-		} else {
-			j--
-		}
-		line := tmp.String() // We use the string-valued token here, for variety.
-		if s.Text() != line {
-			t.Errorf("%d: bad line: %d %d\n%.100q\n%.100q\n", lineNum, len(s.Bytes()), len(line), s.Text(), line)
-		}
-	}
-	err := s.Err()
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 // Test that the line segmenter errors out on a long line.
 func TestSegmentTooLong(t *testing.T) {
 	const smallMaxTokenSize = 256 // Much smaller for more efficient testing.
@@ -334,5 +296,62 @@ func TestSegmentTooLong(t *testing.T) {
 	err := s.Err()
 	if err != ErrTooLong {
 		t.Fatalf("expected ErrTooLong; got %s", err)
+	}
+}
+
+var testError = errors.New("testError")
+
+// Test the correct error is returned when the split function errors out.
+func TestSplitError(t *testing.T) {
+	// Create a split function that delivers a little data, then a predictable error.
+	numSplits := 0
+	const okCount = 7
+	errorSplit := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		if atEOF {
+			panic("didn't get enough data")
+		}
+		if numSplits >= okCount {
+			return 0, nil, testError
+		}
+		numSplits++
+		return 1, data[0:1], nil
+	}
+	// Read the data.
+	const text = "abcdefghijklmnopqrstuvwxyz"
+	buf := strings.NewReader(text)
+	s := NewSegmenter(&slowReader{1, buf})
+	// change to line segmenter for testing
+	s.SetSegmenter(wrapSplitFuncAsSegmentFuncForTesting(errorSplit))
+	var i int
+	for i = 0; s.Segment(); i++ {
+		if len(s.Bytes()) != 1 || text[i] != s.Bytes()[0] {
+			t.Errorf("#%d: expected %q got %q", i, text[i], s.Bytes()[0])
+		}
+	}
+	// Check correct termination location and error.
+	if i != okCount {
+		t.Errorf("unexpected termination; expected %d tokens got %d", okCount, i)
+	}
+	err := s.Err()
+	if err != testError {
+		t.Fatalf("expected %q got %v", testError, err)
+	}
+}
+
+// Test that Scan finishes if we have endless empty reads.
+type endlessZeros struct{}
+
+func (endlessZeros) Read(p []byte) (int, error) {
+	return 0, nil
+}
+
+func TestBadReader(t *testing.T) {
+	scanner := NewSegmenter(endlessZeros{})
+	for scanner.Segment() {
+		t.Fatal("read should fail")
+	}
+	err := scanner.Err()
+	if err != io.ErrNoProgress {
+		t.Errorf("unexpected error: %v", err)
 	}
 }
