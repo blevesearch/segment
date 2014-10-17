@@ -224,6 +224,23 @@ func TestUnicodeSegments(t *testing.T) {
 	}
 }
 
+func TestUnicodeSegmentsSlowReader(t *testing.T) {
+
+	for _, test := range unicodeWordTests {
+		rv := make([][]byte, 0)
+		segmenter := NewWordSegmenter(&slowReader{1, bytes.NewReader(test.input)})
+		for segmenter.Segment() {
+			rv = append(rv, segmenter.Bytes())
+		}
+		if err := segmenter.Err(); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(rv, test.output) {
+			t.Fatalf("expected:\n%#v\ngot:\n%#v\nfor: '%s'", test.output, rv, test.input)
+		}
+	}
+}
+
 func TestWordSegmentLongInputSlowReader(t *testing.T) {
 	// Read the data.
 	text := bytes.Repeat([]byte("abcdefghijklmnop"), 26)
