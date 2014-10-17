@@ -246,15 +246,10 @@ func SegmentWords(data []byte, atEOF bool) (advance int, token []byte, typ int, 
 			break
 		}
 	}
-
-	if start > 0 {
+	if start > 0 && atEOF {
 		return start, data[:start], wordType, nil
 	}
 
-	// If we're at EOF, we have a final, non-empty, non-terminated word. Return it.
-	if atEOF {
-		return len(data), data, wordType, nil
-	}
 	// Request more data
 	return 0, nil, 0, nil
 
