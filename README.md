@@ -47,15 +47,15 @@ The tables.go file is generated from the data in the Unicode Text Segmentation p
 
 To regenerate the files run:
 
-         make tables
+         go generate
 
  The data generated will be based on the Unicode version set by the unicode package value ```unicode.Version```.
 
 ## Status
 
 
- [![Build Status](https://drone.io/github.com/blevesearch/segment/status.png)](https://drone.io/github.com/blevesearch/segment/latest)
+[![Build Status](https://travis-ci.org/blevesearch/segment.svg?branch=master)](https://travis-ci.org/blevesearch/segment)
 
- [![Coverage Status](https://img.shields.io/coveralls/blevesearch/segment.svg)](https://coveralls.io/r/blevesearch/segment?branch=master)
+[![Coverage Status](https://img.shields.io/coveralls/blevesearch/segment.svg)](https://coveralls.io/r/blevesearch/segment?branch=master)
 
- [![GoDoc](https://godoc.org/github.com/blevesearch/segment?status.svg)](https://godoc.org/github.com/blevesearch/segment)
+[![GoDoc](https://godoc.org/github.com/blevesearch/segment?status.svg)](https://godoc.org/github.com/blevesearch/segment)

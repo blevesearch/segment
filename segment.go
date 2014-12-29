@@ -7,6 +7,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:generate go run maketables.go -output tables.go
+//go:generate go run maketesttables.go -output tables_test.go
+
 package segment
 
 import (

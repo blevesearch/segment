@@ -20,6 +20,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"unicode"
@@ -35,8 +36,15 @@ var localFiles = flag.Bool("local",
 	false,
 	"data files have been copied to the current directory; for debugging only")
 
+var outputFile = flag.String("output",
+	"",
+	"output file for generated tables; default stdout")
+
+var output *bufio.Writer
+
 func main() {
 	flag.Parse()
+	setupOutput()
 
 	graphemeTests := make([]test, 0)
 	graphemeTests = loadUnicodeData("GraphemeBreakTest.txt", graphemeTests)
@@ -45,10 +53,12 @@ func main() {
 	sentenceTests := make([]test, 0)
 	sentenceTests = loadUnicodeData("SentenceBreakTest.txt", sentenceTests)
 
-	fmt.Printf(fileHeader, *url)
+	fmt.Fprintf(output, fileHeader, *url)
 	generateTestTables("Grapheme", graphemeTests)
 	generateTestTables("Word", wordTests)
 	generateTestTables("Sentence", sentenceTests)
+
+	flushOutput()
 }
 
 // WordBreakProperty.txt has the form:
@@ -134,14 +144,14 @@ func parseLine(line string, tests []test) []test {
 }
 
 func generateTestTables(prefix string, tests []test) {
-	fmt.Printf(testHeader, prefix)
+	fmt.Fprintf(output, testHeader, prefix)
 	for _, t := range tests {
-		fmt.Printf("\t\t{\n")
-		fmt.Printf("\t\t\tinput: %#v,\n", bytes.Join(t, []byte{}))
-		fmt.Printf("\t\t\toutput: %s,\n", generateTest(t))
-		fmt.Printf("\t\t},\n")
+		fmt.Fprintf(output, "\t\t{\n")
+		fmt.Fprintf(output, "\t\t\tinput: %#v,\n", bytes.Join(t, []byte{}))
+		fmt.Fprintf(output, "\t\t\toutput: %s,\n", generateTest(t))
+		fmt.Fprintf(output, "\t\t},\n")
 	}
-	fmt.Printf("}\n")
+	fmt.Fprintf(output, "}\n")
 }
 
 func generateTest(t test) string {
@@ -165,3 +175,38 @@ const testHeader = `var unicode%sTests = []struct {
 		output [][]byte
 	}{
 `
+
+func setupOutput() {
+	output = bufio.NewWriter(startGofmt())
+}
+
+// startGofmt connects output to a gofmt process if -output is set.
+func startGofmt() io.Writer {
+	if *outputFile == "" {
+		return os.Stdout
+	}
+	stdout, err := os.Create(*outputFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Pipe output to gofmt.
+	gofmt := exec.Command("gofmt")
+	fd, err := gofmt.StdinPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	gofmt.Stdout = stdout
+	gofmt.Stderr = os.Stderr
+	err = gofmt.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fd
+}
+
+func flushOutput() {
+	err := output.Flush()
+	if err != nil {
+		log.Fatal(err)
+	}
+}

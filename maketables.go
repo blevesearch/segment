@@ -19,6 +19,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"unicode"
@@ -33,9 +34,15 @@ var verbose = flag.Bool("verbose",
 var localFiles = flag.Bool("local",
 	false,
 	"data files have been copied to the current directory; for debugging only")
+var outputFile = flag.String("output",
+	"",
+	"output file for generated tables; default stdout")
+
+var output *bufio.Writer
 
 func main() {
 	flag.Parse()
+	setupOutput()
 
 	graphemePropertyRanges := make(map[string]*unicode.RangeTable)
 	loadUnicodeData("GraphemeBreakProperty.txt", graphemePropertyRanges)
@@ -44,10 +51,12 @@ func main() {
 	sentencePropertyRanges := make(map[string]*unicode.RangeTable)
 	loadUnicodeData("SentenceBreakProperty.txt", sentencePropertyRanges)
 
-	fmt.Printf(fileHeader, *url)
+	fmt.Fprintf(output, fileHeader, *url)
 	generateTables("Grapheme", graphemePropertyRanges)
 	generateTables("Word", wordPropertyRanges)
 	generateTables("Sentence", sentencePropertyRanges)
+
+	flushOutput()
 }
 
 // WordBreakProperty.txt has the form:
@@ -198,7 +207,7 @@ func addR32ToTable(r *unicode.RangeTable, r32 unicode.Range32) {
 
 func generateTables(prefix string, propertyRanges map[string]*unicode.RangeTable) {
 	for key, rt := range propertyRanges {
-		fmt.Printf("var _%s%s = %s\n", prefix, key, generateRangeTable(rt))
+		fmt.Fprintf(output, "var _%s%s = %s\n", prefix, key, generateRangeTable(rt))
 	}
 }
 
@@ -233,3 +242,38 @@ import(
 	"unicode"
 )
 `
+
+func setupOutput() {
+	output = bufio.NewWriter(startGofmt())
+}
+
+// startGofmt connects output to a gofmt process if -output is set.
+func startGofmt() io.Writer {
+	if *outputFile == "" {
+		return os.Stdout
+	}
+	stdout, err := os.Create(*outputFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Pipe output to gofmt.
+	gofmt := exec.Command("gofmt")
+	fd, err := gofmt.StdinPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	gofmt.Stdout = stdout
+	gofmt.Stderr = os.Stderr
+	err = gofmt.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fd
+}
+
+func flushOutput() {
+	err := output.Flush()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
