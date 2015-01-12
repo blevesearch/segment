@@ -256,7 +256,9 @@ func SegmentWords(data []byte, atEOF bool) (advance int, token []byte, typ int, 
 }
 
 func wordSegmentProperty(r rune) int {
-	if unicode.Is(_WordCR, r) {
+	if unicode.Is(_WordALetter, r) {
+		return wordALetter
+	} else if unicode.Is(_WordCR, r) {
 		return wordCR
 	} else if unicode.Is(_WordLF, r) {
 		return wordLF
@@ -272,8 +274,6 @@ func wordSegmentProperty(r rune) int {
 		return wordKatakana
 	} else if unicode.Is(_WordHebrew_Letter, r) {
 		return wordHebrew_Letter
-	} else if unicode.Is(_WordALetter, r) {
-		return wordALetter
 	} else if unicode.Is(_WordSingle_Quote, r) {
 		return wordSingle_Quote
 	} else if unicode.Is(_WordDouble_Quote, r) {
