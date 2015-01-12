@@ -66,11 +66,16 @@ func SegmentWords(data []byte, atEOF bool) (advance int, token []byte, typ int, 
 	immediateNextType := -1
 	start := 0
 	wordType := None
+	currType := -1
 	for width := 0; start < len(data); start += width {
 		var r rune
 		r, width = utf8.DecodeRune(data[start:])
 
-		currType := wordSegmentProperty(r)
+		if immediateNextType > 0 {
+			currType = immediateNextType
+		} else {
+			currType = wordSegmentProperty(r)
+		}
 
 		hasNext := false
 		next := start + width
