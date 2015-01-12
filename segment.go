@@ -30,6 +30,19 @@ func NewSegmenter(r io.Reader) *Segmenter {
 	}
 }
 
+// NewSegmenterDirect returns a new Segmenter to work directly with buf.
+// Defaults to segment using SegmentWords
+func NewSegmenterDirect(buf []byte) *Segmenter {
+	return &Segmenter{
+		segment:      SegmentWords,
+		maxTokenSize: MaxScanTokenSize,
+		buf:          buf,
+		start:        0,
+		end:          len(buf),
+		err:          io.EOF,
+	}
+}
+
 // Segmenter provides a convenient interface for reading data such as
 // a file of newline-delimited lines of text. Successive calls to
 // the Segment method will step through the 'tokens' of a file, skipping

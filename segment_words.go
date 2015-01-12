@@ -17,12 +17,12 @@ import (
 
 // NewWordSegmenter returns a new Segmenter to read from r.
 func NewWordSegmenter(r io.Reader) *Segmenter {
-	return &Segmenter{
-		r:            r,
-		segment:      SegmentWords,
-		maxTokenSize: MaxScanTokenSize,
-		buf:          make([]byte, 4096), // Plausible starting size; needn't be large.
-	}
+	return NewSegmenter(r)
+}
+
+// NewWordSegmenterDirect returns a new Segmenter to work directly with buf.
+func NewWordSegmenterDirect(buf []byte) *Segmenter {
+	return NewSegmenterDirect(buf)
 }
 
 const (

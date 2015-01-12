@@ -271,6 +271,18 @@ func BenchmarkWordSegmenter(b *testing.B) {
 	}
 }
 
+func BenchmarkWordSegmenterDirect(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		segmenter := NewWordSegmenterDirect(bleveWikiArticle)
+		for segmenter.Segment() {
+		}
+		if err := segmenter.Err(); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 var bleveWikiArticle = []byte(`Boiling liquid expanding vapor explosion
 From Wikipedia, the free encyclopedia
 See also: Boiler explosion and Steam explosion
