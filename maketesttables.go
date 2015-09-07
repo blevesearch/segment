@@ -1,4 +1,4 @@
-//  Copyright (c) 2014 Couchbase, Inc.
+//  Copyright (c) 2015 Couchbase, Inc.
 //  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 //  except in compliance with the License. You may obtain a copy of the License at
 //    http://www.apache.org/licenses/LICENSE-2.0
@@ -47,16 +47,19 @@ func main() {
 	setupOutput()
 
 	graphemeTests := make([]test, 0)
-	graphemeTests = loadUnicodeData("GraphemeBreakTest.txt", graphemeTests)
+	graphemeComments := make([]string, 0)
+	graphemeTests, graphemeComments = loadUnicodeData("GraphemeBreakTest.txt", graphemeTests, graphemeComments)
 	wordTests := make([]test, 0)
-	wordTests = loadUnicodeData("WordBreakTest.txt", wordTests)
+	wordComments := make([]string, 0)
+	wordTests, wordComments = loadUnicodeData("WordBreakTest.txt", wordTests, wordComments)
 	sentenceTests := make([]test, 0)
-	sentenceTests = loadUnicodeData("SentenceBreakTest.txt", sentenceTests)
+	sentenceComments := make([]string, 0)
+	sentenceTests, sentenceComments = loadUnicodeData("SentenceBreakTest.txt", sentenceTests, sentenceComments)
 
 	fmt.Fprintf(output, fileHeader, *url)
-	generateTestTables("Grapheme", graphemeTests)
-	generateTestTables("Word", wordTests)
-	generateTestTables("Sentence", sentenceTests)
+	generateTestTables("Grapheme", graphemeTests, graphemeComments)
+	generateTestTables("Word", wordTests, wordComments)
+	generateTestTables("Sentence", sentenceTests, sentenceComments)
 
 	flushOutput()
 }
@@ -85,20 +88,20 @@ func openReader(file string) (input io.ReadCloser) {
 	return
 }
 
-func loadUnicodeData(filename string, tests []test) []test {
+func loadUnicodeData(filename string, tests []test, comments []string) ([]test, []string) {
 	f := openReader(filename)
 	defer f.Close()
 	bufioReader := bufio.NewReader(f)
 	line, err := bufioReader.ReadString('\n')
 	for err == nil {
-		tests = parseLine(line, tests)
+		tests, comments = parseLine(line, tests, comments)
 		line, err = bufioReader.ReadString('\n')
 	}
 	// if the err was EOF still need to process last value
 	if err == io.EOF {
-		tests = parseLine(line, tests)
+		tests, comments = parseLine(line, tests, comments)
 	}
-	return tests
+	return tests, comments
 }
 
 const comment = "#"
@@ -107,15 +110,16 @@ const nbrk = "×"
 
 type test [][]byte
 
-func parseLine(line string, tests []test) []test {
+func parseLine(line string, tests []test, comments []string) ([]test, []string) {
 	if strings.HasPrefix(line, comment) {
-		return tests
+		return tests, comments
 	}
 	line = strings.TrimSpace(line)
 	if len(line) == 0 {
-		return tests
+		return tests, comments
 	}
 	commentStart := strings.Index(line, comment)
+	comment := strings.TrimSpace(line[commentStart+1:])
 	if commentStart > 0 {
 		line = line[0:commentStart]
 	}
@@ -131,7 +135,7 @@ func parseLine(line string, tests []test) []test {
 				r, err := strconv.ParseInt(codePoint, 16, 64)
 				if err != nil {
 					log.Printf("err: %v for '%s'", err, string(r))
-					return tests
+					return tests, comments
 				}
 
 				word += string(r)
@@ -140,15 +144,17 @@ func parseLine(line string, tests []test) []test {
 		}
 	}
 	tests = append(tests, t)
-	return tests
+	comments = append(comments, comment)
+	return tests, comments
 }
 
-func generateTestTables(prefix string, tests []test) {
+func generateTestTables(prefix string, tests []test, comments []string) {
 	fmt.Fprintf(output, testHeader, prefix)
-	for _, t := range tests {
+	for i, t := range tests {
 		fmt.Fprintf(output, "\t\t{\n")
 		fmt.Fprintf(output, "\t\t\tinput: %#v,\n", bytes.Join(t, []byte{}))
 		fmt.Fprintf(output, "\t\t\toutput: %s,\n", generateTest(t))
+		fmt.Fprintf(output, "\t\t\tcomment: `%s`,\n", comments[i])
 		fmt.Fprintf(output, "\t\t},\n")
 	}
 	fmt.Fprintf(output, "}\n")
@@ -173,6 +179,7 @@ package segment
 const testHeader = `var unicode%sTests = []struct {
 		input  []byte
 		output [][]byte
+		comment string
 	}{
 `
 
