@@ -233,12 +233,3 @@ func (s *Segmenter) setErr(err error) {
 func (s *Segmenter) SetSegmenter(segmenter SegmentFunc) {
 	s.segment = segmenter
 }
-
-func in(actualTokenType int, possibleTokenTypes ...int) bool {
-	for _, pt := range possibleTokenTypes {
-		if pt == actualTokenType {
-			return true
-		}
-	}
-	return false
-}

@@ -100,142 +100,142 @@ func SegmentWords(data []byte, atEOF bool) (advance int, token []byte, typ int, 
 			next = next + nextWidth
 		}
 
-		if start != 0 && in(currType, wordExtend, wordFormat) {
+		if start != 0 && (currType == wordExtend || currType == wordFormat) {
 			// wb4
 			// dont set prevType, prevPrevType
 			// we ignore that these extended are here
 			// so types should be whatever we saw before them
 			continue
-		} else if in(currType, wordALetter, wordHebrew_Letter) &&
-			in(prevType, wordALetter, wordHebrew_Letter) {
+		} else if (currType == wordALetter || currType == wordHebrew_Letter) &&
+			(prevType == wordALetter || prevType == wordHebrew_Letter) {
 			// wb5
 			wordType = updateWordType(wordType, lookupWordType(currType))
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordMidLetter, wordMidNumLet, wordSingle_Quote) &&
-			in(prevType, wordALetter, wordHebrew_Letter) &&
-			hasNext && in(nextType, wordALetter, wordHebrew_Letter) {
+		} else if (currType == wordMidLetter || currType == wordMidNumLet || currType == wordSingle_Quote) &&
+			(prevType == wordALetter || prevType == wordHebrew_Letter) &&
+			hasNext && (nextType == wordALetter || nextType == wordHebrew_Letter) {
 			// wb6
 			wordType = updateWordType(wordType, Letter)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordMidLetter, wordMidNumLet, wordSingle_Quote) &&
-			in(prevType, wordALetter, wordHebrew_Letter) &&
+		} else if (currType == wordMidLetter || currType == wordMidNumLet || currType == wordSingle_Quote) &&
+			(prevType == wordALetter || prevType == wordHebrew_Letter) &&
 			!hasNext && !atEOF {
 			// possibly wb6, need more data to know
 			return 0, nil, 0, nil
-		} else if in(currType, wordALetter, wordHebrew_Letter) &&
-			in(prevType, wordMidLetter, wordMidNumLet, wordSingle_Quote) &&
-			in(prevPrevType, wordALetter, wordHebrew_Letter) {
+		} else if (currType == wordALetter || currType == wordHebrew_Letter) &&
+			(prevType == wordMidLetter || prevType == wordMidNumLet || prevType == wordSingle_Quote) &&
+			(prevPrevType == wordALetter || prevPrevType == wordHebrew_Letter) {
 			// wb7
 			wordType = updateWordType(wordType, Letter)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordSingle_Quote) &&
-			in(prevType, wordHebrew_Letter) {
+		} else if (currType == wordSingle_Quote) &&
+			(prevType == wordHebrew_Letter) {
 			// wb7a
 			wordType = updateWordType(wordType, Letter)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordDouble_Quote) &&
-			in(prevType, wordHebrew_Letter) &&
-			hasNext && in(nextType, wordHebrew_Letter) {
+		} else if (currType == wordDouble_Quote) &&
+			(prevType == wordHebrew_Letter) &&
+			hasNext && (nextType == wordHebrew_Letter) {
 			// wb7b
 			wordType = updateWordType(wordType, Letter)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordDouble_Quote) &&
-			in(prevType, wordHebrew_Letter) &&
+		} else if (currType == wordDouble_Quote) &&
+			(prevType == wordHebrew_Letter) &&
 			!hasNext && !atEOF {
 			// possibly wb7b, need more data
 			return 0, nil, 0, nil
-		} else if in(currType, wordHebrew_Letter) &&
-			in(prevType, wordDouble_Quote) && in(prevPrevType, wordHebrew_Letter) {
+		} else if (currType == wordHebrew_Letter) &&
+			(prevType == wordDouble_Quote) && (prevPrevType == wordHebrew_Letter) {
 			// wb7c
 			wordType = updateWordType(wordType, Letter)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordNumeric) &&
-			in(prevType, wordNumeric) {
+		} else if (currType == wordNumeric) &&
+			(prevType == wordNumeric) {
 			// wb8
 			wordType = updateWordType(wordType, Number)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordNumeric) &&
-			in(prevType, wordALetter, wordHebrew_Letter) {
+		} else if (currType == wordNumeric) &&
+			(prevType == wordALetter || prevType == wordHebrew_Letter) {
 			// wb9
 			wordType = updateWordType(wordType, Letter)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordALetter, wordHebrew_Letter) &&
-			in(prevType, wordNumeric) {
+		} else if (currType == wordALetter || currType == wordHebrew_Letter) &&
+			(prevType == wordNumeric) {
 			// wb10
 			wordType = updateWordType(wordType, Letter)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordNumeric) &&
-			in(prevType, wordMidNum, wordMidNumLet, wordSingle_Quote) &&
-			in(prevPrevType, wordNumeric) {
+		} else if (currType == wordNumeric) &&
+			(prevType == wordMidNum || prevType == wordMidNumLet || prevType == wordSingle_Quote) &&
+			(prevPrevType == wordNumeric) {
 			// wb11
 			wordType = updateWordType(wordType, Number)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordMidNum, wordMidNumLet, wordSingle_Quote) &&
-			in(prevType, wordNumeric) &&
-			hasNext && in(nextType, wordNumeric) {
+		} else if (currType == wordMidNum || currType == wordMidNumLet || currType == wordSingle_Quote) &&
+			(prevType == wordNumeric) &&
+			hasNext && (nextType == wordNumeric) {
 			// wb12
 			wordType = updateWordType(wordType, Number)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordMidNum, wordMidNumLet, wordSingle_Quote) &&
-			in(prevType, wordNumeric) &&
+		} else if (currType == wordMidNum || currType == wordMidNumLet || currType == wordSingle_Quote) &&
+			(prevType == wordNumeric) &&
 			!hasNext && !atEOF {
 			// possibly wb12, need more data
 			return 0, nil, 0, nil
-		} else if in(currType, wordKatakana) &&
-			in(prevType, wordKatakana) {
+		} else if (currType == wordKatakana) &&
+			(prevType == wordKatakana) {
 			// wb13
 			wordType = updateWordType(wordType, Ideo)
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordExtendNumLet) &&
-			in(prevType, wordALetter, wordHebrew_Letter, wordNumeric, wordKatakana, wordExtendNumLet) {
+		} else if (currType == wordExtendNumLet) &&
+			(prevType == wordALetter || prevType == wordHebrew_Letter || prevType == wordNumeric || prevType == wordKatakana || prevType == wordExtendNumLet) {
 			// wb13a
 			wordType = updateWordType(wordType, lookupWordType(currType))
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordALetter, wordHebrew_Letter, wordNumeric, wordKatakana) &&
-			in(prevType, wordExtendNumLet) {
+		} else if (currType == wordALetter || currType == wordHebrew_Letter || currType == wordNumeric || currType == wordKatakana) &&
+			(prevType == wordExtendNumLet) {
 			// wb13b
 			wordType = updateWordType(wordType, lookupWordType(currType))
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordRegional_Indicator) &&
-			in(prevType, wordRegional_Indicator) {
+		} else if (currType == wordRegional_Indicator) &&
+			(prevType == wordRegional_Indicator) {
 			// wb13c
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if start == 0 && in(currType, wordCR) &&
-			hasNext && in(immediateNextType, wordLF) {
+		} else if start == 0 && (currType == wordCR) &&
+			hasNext && (immediateNextType == wordLF) {
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if start == 0 && !in(currType, wordCR, wordLF, wordNewline) {
+		} else if start == 0 && !(currType == wordCR || currType == wordLF || currType == wordNewline) {
 			// only first char, keep goin
 			wordType = lookupWordType(currType)
 			if wordType == None {
@@ -246,7 +246,7 @@ func SegmentWords(data []byte, atEOF bool) (advance int, token []byte, typ int, 
 			prevPrevType = prevType
 			prevType = currType
 			continue
-		} else if in(currType, wordLF) && in(prevType, wordCR) {
+		} else if (currType == wordLF) && (prevType == wordCR) {
 			start += width
 			break
 		} else {
@@ -275,8 +275,6 @@ func wordSegmentProperty(r rune) int {
 		return wordLF
 	} else if unicode.Is(_WordNewline, r) {
 		return wordNewline
-	} else if unicode.Is(_WordExtend, r) {
-		return wordExtend
 	} else if unicode.Is(_WordRegional_Indicator, r) {
 		return wordRegional_Indicator
 	} else if unicode.Is(_WordFormat, r) {
@@ -299,6 +297,8 @@ func wordSegmentProperty(r rune) int {
 		return wordNumeric
 	} else if unicode.Is(_WordExtendNumLet, r) {
 		return wordExtendNumLet
+	} else if unicode.Is(_WordExtend, r) {
+		return wordExtend
 	} else {
 		return wordOther
 	}
