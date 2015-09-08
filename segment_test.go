@@ -60,7 +60,7 @@ func genLine(buf *bytes.Buffer, lineNum, n int, addNewline bool) {
 }
 
 func wrapSplitFuncAsSegmentFuncForTesting(splitFunc bufio.SplitFunc) SegmentFunc {
-	return func(data []byte, atEOF bool, val [][]byte, types []int) (advance int, token []byte, typ int, err error) {
+	return func(data []byte, atEOF bool) (advance int, token []byte, typ int, err error) {
 		typ = 0
 		advance, token, err = splitFunc(data, atEOF)
 		return

@@ -40,14 +40,14 @@ func NewWordSegmenterDirect(buf []byte) *Segmenter {
 }
 
 func SplitWords(data []byte, atEOF bool) (int, []byte, error) {
-	vals := make([][]byte, 0, 1)
-	types := make([]int, 0, 1)
-	advance, token, _, err := SegmentWords(data, atEOF, vals, types)
+	advance, token, _, err := SegmentWords(data, atEOF)
 	return advance, token, err
 }
 
-func SegmentWords(data []byte, atEOF bool, val [][]byte, types []int) (int, []byte, int, error) {
-	tokens, types, advance, err := segmentWords(data, 1, atEOF, val, types)
+func SegmentWords(data []byte, atEOF bool) (int, []byte, int, error) {
+	vals := make([][]byte, 0, 1)
+	types := make([]int, 0, 1)
+	tokens, types, advance, err := segmentWords(data, 1, atEOF, vals, types)
 	if len(tokens) > 0 {
 		return advance, tokens[0], types[0], err
 	}
@@ -70,8 +70,6 @@ func NewSegmenter(r io.Reader) *Segmenter {
 		segment:      SegmentWords,
 		maxTokenSize: MaxScanTokenSize,
 		buf:          make([]byte, 4096), // Plausible starting size; needn't be large.
-		val:          make([][]byte, 0, 1),
-		types:        make([]int, 0, 1),
 	}
 }
 
@@ -85,8 +83,6 @@ func NewSegmenterDirect(buf []byte) *Segmenter {
 		start:        0,
 		end:          len(buf),
 		err:          io.EOF,
-		val:          make([][]byte, 0, 1),
-		types:        make([]int, 0, 1),
 	}
 }
 
@@ -116,8 +112,6 @@ type Segmenter struct {
 	end          int         // End of data in buf.
 	typ          int         // The token type
 	err          error       // Sticky error.
-	val          [][]byte
-	types        []int
 }
 
 // SegmentFunc is the signature of the segmenting function used to tokenize the
@@ -136,7 +130,7 @@ type Segmenter struct {
 // The function is never called with an empty data slice unless atEOF
 // is true. If atEOF is true, however, data may be non-empty and,
 // as always, holds unprocessed text.
-type SegmentFunc func(data []byte, atEOF bool, val [][]byte, types []int) (advance int, token []byte, segmentType int, err error)
+type SegmentFunc func(data []byte, atEOF bool) (advance int, token []byte, segmentType int, err error)
 
 // Errors returned by Segmenter.
 var (
@@ -187,7 +181,7 @@ func (s *Segmenter) Segment() bool {
 	for {
 		// See if we can get a token with what we already have.
 		if s.end > s.start {
-			advance, token, typ, err := s.segment(s.buf[s.start:s.end], s.err != nil, s.val, s.types)
+			advance, token, typ, err := s.segment(s.buf[s.start:s.end], s.err != nil)
 			if err != nil {
 				s.setErr(err)
 				return false
