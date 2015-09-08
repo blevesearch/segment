@@ -288,6 +288,24 @@ func TestWordSegmentLongInputSlowReader(t *testing.T) {
 	}
 }
 
+func BenchmarkSplitWords(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		vals := make([][]byte, 0)
+		scanner := bufio.NewScanner(bytes.NewReader(bleveWikiArticle))
+		scanner.Split(SplitWords)
+		for scanner.Scan() {
+			vals = append(vals, scanner.Bytes())
+		}
+		if err := scanner.Err(); err != nil {
+			b.Fatal(err)
+		}
+		if len(vals) != 3465 {
+			b.Fatal("expected 3465 tokens, got %d", len(vals))
+		}
+	}
+
+}
+
 func BenchmarkWordSegmenter(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
