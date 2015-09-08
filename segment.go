@@ -26,7 +26,7 @@ import (
 //
 //go:generate ragel/unicode2ragel.rb -u http://www.unicode.org/Public/8.0.0/ucd/Scripts.txt -m SCRIPTS -p Hangul,Han,Hiragana -o ragel/uscript.rl
 //go:generate ragel/unicode2ragel.rb -u http://www.unicode.org/Public/8.0.0/ucd/auxiliary/WordBreakProperty.txt -m WB -p Double_Quote,Single_Quote,Hebrew_Letter,CR,LF,Newline,Extend,Format,Katakana,ALetter,MidLetter,MidNum,MidNumLet,Numeric,ExtendNumLet,Regional_Indicator -o ragel/uwb.rl
-//go:generate ragel -Z segment_words.rl
+//go:generate ragel -G2 -Z segment_words.rl
 //go:generate go run maketesttables.go -output tables_test.go
 
 // NewWordSegmenter returns a new Segmenter to read from r.
@@ -40,7 +40,9 @@ func NewWordSegmenterDirect(buf []byte) *Segmenter {
 }
 
 func SplitWords(data []byte, atEOF bool) (int, []byte, error) {
-	advance, token, _, err := SegmentWords(data, atEOF, nil, nil)
+	vals := make([][]byte, 0, 1)
+	types := make([]int, 0, 1)
+	advance, token, _, err := SegmentWords(data, atEOF, vals, types)
 	return advance, token, err
 }
 
