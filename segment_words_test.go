@@ -300,7 +300,7 @@ func BenchmarkSplitWords(b *testing.B) {
 			b.Fatal(err)
 		}
 		if len(vals) != 3465 {
-			b.Fatal("expected 3465 tokens, got %d", len(vals))
+			b.Fatalf("expected 3465 tokens, got %d", len(vals))
 		}
 	}
 
