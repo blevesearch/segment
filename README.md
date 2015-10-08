@@ -41,6 +41,14 @@ but additionally a token type is returned.
 			t.Fatal(err)
 		}
 
+## Choosing Implementation
+
+By default segment does NOT use the fastest runtime implementation.  The reason is that it adds approximately 5s to compilation time and may require more than 1GB of ram on the machine performing compilation.
+
+However, you can choose to build with the fastest runtime implementation by passing the build tag as follows:
+
+		-tags 'prod'
+
 ## Generating Code
 
 Several components in this package are generated.
