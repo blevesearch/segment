@@ -16,6 +16,8 @@ import (
   "unicode/utf8"
 )
 
+var RagelFlags = "RAGELFLAGS"
+
 var ParseError = fmt.Errorf("unicode word segmentation parse error")
 
 // Word Types
@@ -199,7 +201,7 @@ func segmentWords(data []byte, maxTokens int, atEOF bool, val [][]byte, types []
   #        WB11.  Numeric (MidNum | MidNumLet | Single_Quote) × Numeric
   #       WB12.  Numeric × (MidNum | MidNumLet | Single_Quote) Numeric
   #       WB13a. (ALetter | Hebrew_Letter | Numeric | Katakana | ExtendNumLet) × ExtendNumLet
-  #       WB13b. ExtendNumLet × (ALetter | Hebrew_Letter | Numeric | Katakana) 
+  #       WB13b. ExtendNumLet × (ALetter | Hebrew_Letter | Numeric | Katakana)
   #
   WordNumeric = ( ( ExtendNumLetEx )* NumericEx ( ( ( ExtendNumLetEx )* | MidNumericEx ) NumericEx )* ( ExtendNumLetEx )* ) >startToken @endToken;
 
@@ -217,7 +219,7 @@ func segmentWords(data []byte, maxTokens int, atEOF bool, val [][]byte, types []
   #       WB10.  Numeric × (ALetter | Hebrew_Letter)
   #       WB13.  Katakana × Katakana
   #       WB13a. (ALetter | Hebrew_Letter | Numeric | Katakana | ExtendNumLet) × ExtendNumLet
-  #       WB13b. ExtendNumLet × (ALetter | Hebrew_Letter | Numeric | Katakana) 
+  #       WB13b. ExtendNumLet × (ALetter | Hebrew_Letter | Numeric | Katakana)
   #
   # Marty -deviated here to allow for (ExtendNumLetEx x ExtendNumLetEx) part of 13a
   #

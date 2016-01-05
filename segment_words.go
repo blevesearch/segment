@@ -18,6 +18,8 @@ import (
   "unicode/utf8"
 )
 
+var RagelFlags = "-T1"
+
 var ParseError = fmt.Errorf("unicode word segmentation parse error")
 
 // Word Types
@@ -30,7 +32,7 @@ const (
 )
 
 
-//line segment_words.go:34
+//line segment_words.go:36
 var _s_key_offsets []uint16 = []uint16{
 	0, 1, 3, 5, 7, 10, 15, 20, 
 	23, 31, 35, 37, 39, 41, 71, 79, 
@@ -703,7 +705,7 @@ var _s_key_offsets []uint16 = []uint16{
 }
 
 var _s_trans_keys []byte = []byte{
-	173, 128, 255, 176, 255, 131, 137, 191, 
+	173, 0, 127, 176, 255, 131, 137, 191, 
 	145, 189, 135, 129, 130, 132, 133, 156, 
 	128, 133, 144, 154, 176, 139, 159, 150, 
 	157, 159, 164, 167, 168, 170, 173, 143, 
@@ -789,7 +791,7 @@ var _s_trans_keys []byte = []byte{
 	235, 236, 170, 173, 181, 186, 128, 150, 
 	152, 182, 184, 255, 192, 255, 128, 255, 
 	173, 130, 133, 146, 159, 165, 171, 175, 
-	255, 128, 255, 181, 190, 176, 183, 184, 
+	255, 0, 127, 181, 190, 176, 183, 184, 
 	185, 186, 191, 192, 255, 134, 140, 136, 
 	138, 142, 161, 163, 255, 182, 130, 131, 
 	137, 176, 151, 152, 154, 160, 190, 136, 
@@ -1000,7 +1002,7 @@ var _s_trans_keys []byte = []byte{
 	255, 192, 255, 176, 255, 194, 204, 205, 
 	210, 214, 215, 216, 217, 219, 220, 221, 
 	222, 223, 224, 225, 226, 227, 234, 239, 
-	240, 243, 48, 57, 173, 0, 127, 176, 
+	240, 243, 48, 57, 173, 128, 255, 176, 
 	255, 131, 137, 191, 145, 189, 135, 129, 
 	130, 132, 133, 156, 128, 133, 144, 154, 
 	171, 176, 139, 159, 160, 169, 150, 157, 
@@ -1099,7 +1101,7 @@ var _s_trans_keys []byte = []byte{
 	130, 132, 133, 144, 170, 176, 178, 194, 
 	204, 205, 210, 214, 215, 216, 217, 219, 
 	220, 221, 222, 223, 224, 225, 226, 227, 
-	234, 239, 240, 243, 173, 0, 127, 176, 
+	234, 239, 240, 243, 173, 128, 255, 176, 
 	255, 131, 137, 191, 145, 189, 135, 129, 
 	130, 132, 133, 144, 170, 176, 178, 170, 
 	173, 181, 186, 0, 127, 181, 190, 176, 
@@ -1600,7 +1602,7 @@ var _s_trans_keys []byte = []byte{
 	144, 150, 152, 158, 160, 191, 128, 130, 
 	131, 132, 133, 134, 135, 139, 140, 141, 
 	133, 170, 175, 177, 181, 187, 188, 173, 
-	0, 127, 176, 255, 131, 137, 191, 145, 
+	128, 255, 176, 255, 131, 137, 191, 145, 
 	189, 135, 129, 130, 132, 133, 156, 128, 
 	133, 144, 154, 176, 139, 159, 150, 157, 
 	159, 164, 167, 168, 170, 173, 143, 145, 
@@ -1751,7 +1753,7 @@ var _s_trans_keys []byte = []byte{
 	162, 133, 143, 144, 150, 151, 255, 160, 
 	128, 129, 132, 135, 133, 134, 129, 160, 
 	255, 192, 255, 176, 255, 170, 173, 181, 
-	186, 128, 255, 181, 190, 176, 183, 184, 
+	186, 0, 127, 181, 190, 176, 183, 184, 
 	185, 186, 191, 192, 255, 130, 131, 137, 
 	137, 190, 136, 144, 145, 191, 192, 255, 
 	135, 179, 129, 130, 132, 133, 144, 170, 
@@ -2464,8 +2466,8 @@ var _s_trans_keys []byte = []byte{
 	182, 187, 255, 173, 180, 182, 255, 132, 
 	155, 159, 161, 175, 163, 144, 150, 160, 
 	128, 129, 132, 135, 133, 134, 129, 160, 
-	255, 192, 255, 170, 173, 181, 186, 0, 
-	127, 181, 190, 176, 183, 184, 185, 186, 
+	255, 192, 255, 170, 173, 181, 186, 128, 
+	255, 181, 190, 176, 183, 184, 185, 186, 
 	191, 192, 255, 130, 131, 137, 137, 190, 
 	136, 144, 145, 191, 192, 255, 135, 179, 
 	129, 130, 132, 133, 144, 170, 176, 178, 
@@ -2627,7 +2629,7 @@ var _s_trans_keys []byte = []byte{
 	133, 143, 144, 150, 151, 255, 160, 128, 
 	129, 132, 135, 133, 134, 129, 160, 255, 
 	192, 255, 176, 255, 170, 173, 181, 183, 
-	186, 0, 127, 181, 190, 176, 183, 184, 
+	186, 128, 255, 181, 190, 176, 183, 184, 
 	185, 186, 191, 192, 255, 130, 131, 137, 
 	190, 136, 144, 145, 191, 192, 255, 135, 
 	179, 180, 129, 130, 132, 133, 144, 170, 
@@ -2788,7 +2790,7 @@ var _s_trans_keys []byte = []byte{
 	184, 185, 186, 161, 162, 133, 143, 144, 
 	150, 151, 255, 160, 128, 129, 132, 135, 
 	133, 134, 129, 160, 255, 192, 255, 176, 
-	255, 170, 173, 181, 186, 0, 127, 181, 
+	255, 170, 173, 181, 186, 128, 255, 181, 
 	190, 176, 183, 184, 185, 186, 191, 192, 
 	255, 130, 131, 137, 190, 136, 144, 145, 
 	191, 192, 255, 135, 179, 129, 130, 132, 
@@ -9141,7 +9143,7 @@ var _s_index_offsets []uint16 = []uint16{
 }
 
 var _s_indicies []int16 = []int16{
-	1, 0, 1, 2, 2, 1, 1, 0, 
+	1, 0, 2, 1, 2, 1, 1, 0, 
 	1, 1, 0, 1, 1, 1, 0, 1, 
 	1, 1, 0, 1, 1, 0, 1, 1, 
 	1, 1, 0, 1, 1, 1, 0, 0, 
@@ -9216,7 +9218,7 @@ var _s_indicies []int16 = []int16{
 	175, 177, 178, 179, 180, 148, 148, 151, 
 	176, 2, 148, 181, 148, 148, 2, 148, 
 	148, 148, 2, 148, 2, 148, 148, 2, 
-	2, 2, 2, 2, 2, 148, 181, 2, 
+	2, 2, 2, 2, 2, 148, 2, 181, 
 	2, 2, 148, 2, 148, 2, 181, 148, 
 	148, 148, 148, 148, 2, 2, 148, 2, 
 	181, 148, 2, 148, 2, 2, 148, 2, 
@@ -9383,7 +9385,7 @@ var _s_indicies []int16 = []int16{
 	2, 181, 181, 2, 181, 422, 423, 424, 
 	425, 426, 427, 428, 429, 430, 431, 432, 
 	433, 434, 435, 436, 437, 438, 439, 440, 
-	441, 442, 421, 420, 443, 420, 420, 443, 
+	441, 442, 421, 420, 443, 420, 443, 420, 
 	420, 443, 443, 420, 443, 443, 420, 443, 
 	443, 443, 420, 443, 443, 443, 420, 421, 
 	443, 443, 421, 420, 443, 443, 443, 443, 
@@ -9465,8 +9467,8 @@ var _s_indicies []int16 = []int16{
 	571, 148, 571, 571, 572, 572, 420, 573, 
 	574, 575, 576, 577, 578, 579, 580, 581, 
 	582, 583, 584, 585, 586, 587, 588, 589, 
-	590, 591, 592, 593, 420, 594, 420, 420, 
-	594, 420, 594, 594, 420, 594, 594, 420, 
+	590, 591, 592, 593, 420, 594, 420, 594, 
+	420, 420, 594, 594, 420, 594, 594, 420, 
 	594, 594, 594, 595, 595, 420, 148, 595, 
 	148, 148, 420, 420, 595, 420, 420, 148, 
 	420, 148, 420, 595, 420, 595, 148, 420, 
@@ -9847,7 +9849,7 @@ var _s_indicies []int16 = []int16{
 	420, 148, 148, 148, 148, 148, 571, 420, 
 	1042, 1043, 1044, 272, 151, 273, 1045, 1046, 
 	1047, 1048, 420, 148, 571, 1049, 148, 420, 
-	1049, 420, 2, 1049, 420, 1049, 1049, 420, 
+	1049, 420, 1049, 2, 420, 1049, 1049, 420, 
 	1049, 1049, 420, 1049, 1049, 1049, 420, 1049, 
 	1049, 1049, 420, 1049, 1049, 420, 1049, 1049, 
 	1049, 1049, 420, 1049, 1049, 1049, 420, 420, 
@@ -9973,7 +9975,7 @@ var _s_indicies []int16 = []int16{
 	411, 151, 420, 420, 571, 420, 148, 1238, 
 	420, 1239, 1240, 1241, 1243, 1242, 420, 571, 
 	571, 420, 420, 571, 571, 420, 571, 148, 
-	421, 148, 148, 420, 421, 420, 420, 443, 
+	421, 148, 148, 420, 420, 421, 420, 443, 
 	148, 420, 148, 420, 421, 420, 421, 148, 
 	443, 420, 420, 421, 420, 148, 421, 148, 
 	421, 421, 572, 572, 420, 421, 421, 443, 
@@ -10521,7 +10523,7 @@ var _s_indicies []int16 = []int16{
 	125, 125, 1626, 1626, 1626, 1626, 125, 1875, 
 	125, 1626, 125, 1876, 125, 1877, 1878, 128, 
 	129, 1879, 125, 1626, 1626, 125, 125, 1626, 
-	1626, 148, 1880, 148, 148, 125, 125, 1880, 
+	1626, 148, 1880, 148, 148, 125, 1880, 125, 
 	125, 1626, 148, 125, 148, 125, 1880, 125, 
 	1880, 148, 1626, 125, 125, 1880, 125, 148, 
 	1880, 148, 1880, 1880, 572, 572, 125, 1880, 
@@ -10643,7 +10645,7 @@ var _s_indicies []int16 = []int16{
 	410, 411, 151, 125, 125, 1880, 125, 148, 
 	2002, 125, 2003, 2004, 2005, 2007, 2006, 125, 
 	1880, 1880, 125, 125, 1880, 1880, 125, 1880, 
-	148, 2008, 148, 181, 148, 420, 420, 2008, 
+	148, 2008, 148, 181, 148, 420, 2008, 420, 
 	420, 420, 148, 420, 148, 420, 2008, 420, 
 	2008, 148, 420, 420, 2008, 420, 148, 2008, 
 	148, 181, 2008, 2008, 572, 572, 420, 2008, 
@@ -10765,7 +10767,7 @@ var _s_indicies []int16 = []int16{
 	420, 2008, 420, 148, 2130, 420, 2131, 2132, 
 	2133, 2135, 2134, 420, 2008, 2008, 420, 420, 
 	2008, 2008, 420, 2008, 148, 2136, 148, 148, 
-	420, 420, 2136, 420, 420, 148, 420, 148, 
+	420, 2136, 420, 420, 420, 148, 420, 148, 
 	420, 2136, 420, 2136, 148, 420, 420, 2136, 
 	420, 148, 2136, 148, 2136, 2136, 572, 572, 
 	420, 2136, 2136, 2136, 148, 420, 126, 2136, 
@@ -18538,7 +18540,7 @@ const s_error int = -1
 const s_en_main int = 4862
 
 
-//line segment_words.rl:33
+//line segment_words.rl:35
 
 
 func segmentWords(data []byte, maxTokens int, atEOF bool, val [][]byte, types []int) ([][]byte, []int, int, error) {
@@ -18568,7 +18570,7 @@ func segmentWords(data []byte, maxTokens int, atEOF bool, val [][]byte, types []
   endPos := 0
   totalConsumed := 0
   
-//line segment_words.go:18572
+//line segment_words.go:18574
 	{
 	cs = s_start
 	ts = 0
@@ -18576,7 +18578,7 @@ func segmentWords(data []byte, maxTokens int, atEOF bool, val [][]byte, types []
 	act = 0
 	}
 
-//line segment_words.go:18580
+//line segment_words.go:18582
 	{
 	var _klen int
 	var _keys int
@@ -18592,7 +18594,7 @@ _resume:
 ts = p
 
 
-//line segment_words.go:18596
+//line segment_words.go:18598
 	}
 
 	_keys = int(_s_key_offsets[cs])
@@ -18658,13 +18660,13 @@ _eof_trans:
 
 	switch _s_trans_actions[_trans] {
 	case 10:
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
 
 	case 34:
-//line segment_words.rl:74
+//line segment_words.rl:76
 te = p
 p--
 {
@@ -18681,7 +18683,7 @@ p--
   }
 
 	case 37:
-//line segment_words.rl:87
+//line segment_words.rl:89
 te = p
 p--
 {
@@ -18700,7 +18702,7 @@ p--
   }
 
 	case 39:
-//line segment_words.rl:102
+//line segment_words.rl:104
 te = p
 p--
 {
@@ -18719,7 +18721,7 @@ p--
   }
 
 	case 35:
-//line segment_words.rl:117
+//line segment_words.rl:119
 te = p
 p--
 {
@@ -18735,7 +18737,7 @@ p--
   }
 
 	case 38:
-//line segment_words.rl:129
+//line segment_words.rl:131
 te = p
 p--
 {
@@ -18754,7 +18756,7 @@ p--
   }
 
 	case 40:
-//line segment_words.rl:144
+//line segment_words.rl:146
 te = p
 p--
 {
@@ -18773,7 +18775,7 @@ p--
   }
 
 	case 41:
-//line segment_words.rl:159
+//line segment_words.rl:161
 te = p
 p--
 {
@@ -18800,7 +18802,7 @@ p--
   }
 
 	case 32:
-//line segment_words.rl:159
+//line segment_words.rl:161
 te = p
 p--
 {
@@ -18827,7 +18829,7 @@ p--
   }
 
 	case 36:
-//line segment_words.rl:159
+//line segment_words.rl:161
 te = p
 p--
 {
@@ -18854,7 +18856,7 @@ p--
   }
 
 	case 31:
-//line segment_words.rl:159
+//line segment_words.rl:161
 te = p
 p--
 {
@@ -18881,7 +18883,7 @@ p--
   }
 
 	case 4:
-//line segment_words.rl:74
+//line segment_words.rl:76
 p = (te) - 1
 {
     if !atEOF {
@@ -18897,7 +18899,7 @@ p = (te) - 1
   }
 
 	case 12:
-//line segment_words.rl:87
+//line segment_words.rl:89
 p = (te) - 1
 {
     if endPos+1 == pe && !atEOF {
@@ -18915,7 +18917,7 @@ p = (te) - 1
   }
 
 	case 17:
-//line segment_words.rl:102
+//line segment_words.rl:104
 p = (te) - 1
 {
     if endPos+1 == pe && !atEOF {
@@ -18933,7 +18935,7 @@ p = (te) - 1
   }
 
 	case 7:
-//line segment_words.rl:117
+//line segment_words.rl:119
 p = (te) - 1
 {
     if !atEOF {
@@ -18948,7 +18950,7 @@ p = (te) - 1
   }
 
 	case 15:
-//line segment_words.rl:129
+//line segment_words.rl:131
 p = (te) - 1
 {
     if endPos+1 == pe && !atEOF {
@@ -18966,7 +18968,7 @@ p = (te) - 1
   }
 
 	case 19:
-//line segment_words.rl:144
+//line segment_words.rl:146
 p = (te) - 1
 {
     if endPos+1 == pe && !atEOF {
@@ -18984,7 +18986,7 @@ p = (te) - 1
   }
 
 	case 21:
-//line segment_words.rl:159
+//line segment_words.rl:161
 p = (te) - 1
 {
     lastPos := startPos
@@ -19010,7 +19012,7 @@ p = (te) - 1
   }
 
 	case 8:
-//line segment_words.rl:159
+//line segment_words.rl:161
 p = (te) - 1
 {
     lastPos := startPos
@@ -19036,7 +19038,7 @@ p = (te) - 1
   }
 
 	case 1:
-//line segment_words.rl:159
+//line segment_words.rl:161
 p = (te) - 1
 {
     lastPos := startPos
@@ -19215,21 +19217,21 @@ p = (te) - 1
 	
 
 	case 28:
-//line segment_words.rl:66
+//line segment_words.rl:68
 
     startPos = p
   
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
 
 	case 33:
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:159
+//line segment_words.rl:161
 te = p+1
 {
     lastPos := startPos
@@ -19255,11 +19257,11 @@ te = p+1
   }
 
 	case 13:
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:159
+//line segment_words.rl:161
 te = p+1
 {
     lastPos := startPos
@@ -19288,21 +19290,21 @@ te = p+1
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
 
 	case 26:
-//line segment_words.rl:66
+//line segment_words.rl:68
 
     startPos = p
   
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:159
+//line segment_words.rl:161
 te = p+1
 {
     lastPos := startPos
@@ -19328,15 +19330,15 @@ te = p+1
   }
 
 	case 27:
-//line segment_words.rl:66
+//line segment_words.rl:68
 
     startPos = p
   
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:159
+//line segment_words.rl:161
 te = p+1
 {
     lastPos := startPos
@@ -19365,136 +19367,136 @@ te = p+1
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:74
+//line segment_words.rl:76
 act = 1;
 
 	case 11:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:87
+//line segment_words.rl:89
 act = 2;
 
 	case 16:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:102
+//line segment_words.rl:104
 act = 3;
 
 	case 6:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:117
+//line segment_words.rl:119
 act = 4;
 
 	case 14:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:129
+//line segment_words.rl:131
 act = 5;
 
 	case 20:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:159
+//line segment_words.rl:161
 act = 7;
 
 	case 9:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:159
+//line segment_words.rl:161
 act = 12;
 
 	case 2:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:159
+//line segment_words.rl:161
 act = 13;
 
 	case 29:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:66
+//line segment_words.rl:68
 
     startPos = p
   
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:74
+//line segment_words.rl:76
 act = 1;
 
 	case 30:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:66
+//line segment_words.rl:68
 
     startPos = p
   
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:117
+//line segment_words.rl:119
 act = 4;
 
 	case 25:
 //line NONE:1
 te = p+1
 
-//line segment_words.rl:66
+//line segment_words.rl:68
 
     startPos = p
   
-//line segment_words.rl:70
+//line segment_words.rl:72
 
     endPos = p
   
-//line segment_words.rl:159
+//line segment_words.rl:161
 act = 13;
 
-//line segment_words.go:19498
+//line segment_words.go:19500
 	}
 
 _again:
@@ -19504,7 +19506,7 @@ _again:
 ts = 0
 
 
-//line segment_words.go:19508
+//line segment_words.go:19510
 	}
 
 	if p++; p != pe {
@@ -19518,18 +19520,18 @@ ts = 0
 		}
 		switch _s_eof_actions[cs] {
 		case 24:
-//line segment_words.rl:66
+//line segment_words.rl:68
 
     startPos = p
   
 
-//line segment_words.go:19527
+//line segment_words.go:19529
 		}
 	}
 
 	}
 
-//line segment_words.rl:276
+//line segment_words.rl:278
 
 
   if cs < s_first_final {

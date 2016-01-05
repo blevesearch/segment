@@ -29,8 +29,10 @@ import (
 //go:generate ragel/unicode2ragel.rb -u http://www.unicode.org/Public/8.0.0/ucd/auxiliary/WordBreakProperty.txt -m WB -p Double_Quote,Single_Quote,Hebrew_Letter,CR,LF,Newline,Extend,Format,Katakana,ALetter,MidLetter,MidNum,MidNumLet,Numeric,ExtendNumLet,Regional_Indicator -o ragel/uwb.rl
 //go:generate ragel -T1 -Z segment_words.rl -o segment_words.go
 //go:generate sed -i "" -e "s/BUILDTAGS/!prod/" segment_words.go
+//go:generate sed -i "" -e "s/RAGELFLAGS/-T1/" segment_words.go
 //go:generate ragel -G2 -Z segment_words.rl -o segment_words_prod.go
 //go:generate sed -i "" -e "s/BUILDTAGS/prod/" segment_words_prod.go
+//go:generate sed -i "" -e "s/RAGELFLAGS/-G2/" segment_words_prod.go
 //go:generate go run maketesttables.go -output tables_test.go
 
 // NewWordSegmenter returns a new Segmenter to read from r.
